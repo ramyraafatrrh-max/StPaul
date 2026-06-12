@@ -1,143 +1,484 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Interactive Voting</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial;
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(135deg, #6a11cb, #2575fc, #00c9a7);
+      background-size: 300% 300%;
+      animation: gradientMove 12s ease infinite;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: #222;
+    }
+
+    @keyframes gradientMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .container {
+      width: 100%;
+      max-width: 900px;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 24px;
+      padding: 35px 30px;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.18);
       text-align: center;
-      background: #f5f5f5;
-      padding: 40px;
+      backdrop-filter: blur(8px);
     }
-    .box {
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      max-width: 600px;
-      margin: auto;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+
+    .badge {
+      display: inline-block;
+      background: linear-gradient(90deg, #ff7eb3, #ff758c);
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+      padding: 10px 18px;
+      border-radius: 999px;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 20px rgba(255, 117, 140, 0.35);
     }
-    button {
-      padding: 15px 25px;
-      margin: 10px;
-      font-size: 16px;
+
+    h1 {
+      margin: 10px 0 25px;
+      font-size: 38px;
+      line-height: 1.3;
+      color: #1f2a44;
+    }
+
+    .question {
+      font-size: 34px;
+      font-weight: bold;
+      line-height: 1.4;
+      color: #243b53;
+      margin: 15px 0 35px;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-bottom: 25px;
+    }
+
+    .vote-btn {
+      border: none;
+      border-radius: 18px;
+      padding: 22px 20px;
+      font-size: 26px;
+      font-weight: bold;
       cursor: pointer;
+      color: white;
+      transition: all 0.2s ease;
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+      min-height: 95px;
+    }
+
+    .vote-btn.option1 {
+      background: linear-gradient(135deg, #ff6a00, #ee0979);
+    }
+
+    .vote-btn.option2 {
+      background: linear-gradient(135deg, #11998e, #38ef7d);
+    }
+
+    .vote-btn:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 16px 30px rgba(0, 0, 0, 0.2);
+      filter: brightness(1.05);
+    }
+
+    .vote-btn:active {
+      transform: translateY(1px) scale(0.99);
+    }
+
+    .vote-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .controls {
+      margin-top: 10px;
+      margin-bottom: 20px;
+    }
+
+    .skip-btn, .next-btn, .restart-btn {
+      border: none;
+      border-radius: 14px;
+      padding: 14px 22px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      color: white;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.25);
+      transition: all 0.2s ease;
+      margin: 5px;
+    }
+
+    .skip-btn:hover,
+    .next-btn:hover,
+    .restart-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 24px rgba(102, 126, 234, 0.35);
+    }
+
+    .timer {
+      font-size: 28px;
+      font-weight: bold;
+      color: #7b1fa2;
+      margin: 20px 0 10px;
+    }
+
+    .sub-text {
+      font-size: 18px;
+      color: #53627c;
+      margin-bottom: 10px;
+    }
+
+    .result-box {
+      margin-top: 25px;
+      padding: 22px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #fdfbfb, #ebedee);
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05);
+    }
+
+    .winner-title {
+      font-size: 26px;
+      font-weight: bold;
+      color: #2d3748;
+      margin-bottom: 10px;
+    }
+
+    .winner-answer {
+      font-size: 32px;
+      font-weight: bold;
+      color: #e91e63;
+      margin-bottom: 10px;
+    }
+
+    .score {
+      font-size: 22px;
+      color: #374151;
+    }
+
+    .summary-title {
+      font-size: 36px;
+      color: #1f2a44;
+      margin-bottom: 15px;
+    }
+
+    .summary-subtitle {
+      font-size: 22px;
+      color: #55637a;
+      margin-bottom: 30px;
+    }
+
+    .summary-list {
+      text-align: left;
+      margin-top: 25px;
+    }
+
+    .summary-item {
+      background: linear-gradient(135deg, #ffffff, #f7f9fc);
+      border-left: 8px solid #6a11cb;
+      border-radius: 16px;
+      padding: 20px 22px;
+      margin-bottom: 18px;
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);
+    }
+
+    .summary-question {
+      font-size: 24px;
+      font-weight: bold;
+      color: #22324a;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .summary-answer {
+      font-size: 22px;
+      color: #0f9d58;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .summary-votes {
+      font-size: 19px;
+      color: #4b5563;
+    }
+
+    .footer-note {
+      margin-top: 25px;
+      font-size: 16px;
+      color: #6b7280;
+    }
+
+    @media (max-width: 700px) {
+      .card {
+        padding: 24px 18px;
+      }
+
+      h1 {
+        font-size: 28px;
+      }
+
+      .question {
+        font-size: 26px;
+      }
+
+      .buttons {
+        grid-template-columns: 1fr;
+      }
+
+      .vote-btn {
+        font-size: 22px;
+        min-height: 82px;
+      }
+
+      .timer {
+        font-size: 24px;
+      }
+
+      .winner-answer {
+        font-size: 28px;
+      }
+
+      .summary-question {
+        font-size: 21px;
+      }
+
+      .summary-answer {
+        font-size: 20px;
+      }
     }
   </style>
 </head>
 <body>
+  <div class="container">
+    <div class="card" id="app">
+      <!-- Content loads by JavaScript -->
+    </div>
+  </div>
 
-<div class="box">
-  <h2 id="title"></h2>
-  <p id="question"></p>
+  <script>
+    const scenarios = [
+      {
+        text: "You find a wallet on the street. What do you do?",
+        options: ["Keep it", "Return it"]
+      },
+      {
+        text: "You have one free evening. What would you choose?",
+        options: ["Watch a movie", "Go for exercise"]
+      },
+      {
+        text: "You receive extra money this month. What do you do?",
+        options: ["Save it", "Spend it"]
+      },
+      {
+        text: "Your team can work in one way this week. Which do you prefer?",
+        options: ["Work from home", "Go to the office"]
+      },
+      {
+        text: "You can take a short vacation. Where do you go?",
+        options: ["Beach", "Mountains"]
+      }
+    ];
 
-  <button id="btn1"></button>
-  <button id="btn2"></button>
+    let currentScenario = 0;
+    let votes = [0, 0];
+    let timeLeft = 30;
+    let timerInterval = null;
+    let votingEnded = false;
 
-  <p id="timer"></p>
-  <div id="result"></div>
-</div>
+    const resultsSummary = [];
 
-<script>
-const scenarios = [
-  {
-    text: "You find a wallet. What do you do?",
-    options: ["Keep it", "Return it"]
-  },
-  {
-    text: "Work style?",
-    options: ["Remote", "Office"]
-  },
-  {
-    text: "Free time?",
-    options: ["Movie", "Exercise"]
-  },
-  {
-    text: "Extra money?",
-    options: ["Save", "Spend"]
-  },
-  {
-    text: "Travel?",
-    options: ["Beach", "Mountains"]
-  }
-];
+    const app = document.getElementById("app");
 
-let current = 0;
-let votes = [0, 0];
-let time = 30;
-let interval;
+    function renderScenario() {
+      votingEnded = false;
+      votes = [0, 0];
+      timeLeft = 30;
 
-function loadScenario() {
-  document.getElementById("title").innerText =
-    "Scenario " + (current + 1) + " / " + scenarios.length;
+      const scenario = scenarios[currentScenario];
 
-  document.getElementById("question").innerText =
-    scenarios[current].text;
+      app.innerHTML = `
+        <div class="badge">Scenario ${currentScenario + 1} of ${scenarios.length}</div>
+        <h1>Interactive Audience Voting</h1>
+        <div class="question">${scenario.text}</div>
 
-  document.getElementById("btn1").innerText =
-    scenarios[current].options[0];
+        <div class="buttons">
+          <button class="vote-btn option1" id="btn1">${scenario.options[0]}</button>
+          <button class="vote-btn option2" id="btn2">${scenario.options[1]}</button>
+        </div>
 
-  document.getElementById("btn2").innerText =
-    scenarios[current].options[1];
+        <div class="controls">
+          <button class="skip-btn" id="skipBtn">Skip Timer</button>
+        </div>
 
-  votes = [0, 0];
-  time = 30;
-  document.getElementById("result").innerHTML = "";
+        <div class="timer" id="timer">⏳ Time left: 30 sec</div>
+        <div class="sub-text">Audience can click as many times as needed during the countdown.</div>
 
-  startTimer();
-}
+        <div id="resultArea"></div>
+      `;
 
-document.getElementById("btn1").onclick = () => vote(0);
-document.getElementById("btn2").onclick = () => vote(1);
+      document.getElementById("btn1").addEventListener("click", () => addVote(0));
+      document.getElementById("btn2").addEventListener("click", () => addVote(1));
+      document.getElementById("skipBtn").addEventListener("click", endVotingEarly);
 
-function vote(i) {
-  if (time > 0) {
-    votes[i]++;
-  }
-}
-
-function startTimer() {
-  interval = setInterval(() => {
-    time--;
-    document.getElementById("timer").innerText =
-      "Time left: " + time + " sec";
-
-    if (time <= 0) {
-      clearInterval(interval);
-      showResult();
+      startTimer();
     }
-  }, 1000);
-}
 
-function showResult() {
-  let winner;
+    function addVote(optionIndex) {
+      if (votingEnded) return;
+      votes[optionIndex]++;
+    }
 
-  if (votes[0] === votes[1]) {
-    winner = "It's a tie!";
-  } else if (votes[0] > votes[1]) {
-    winner = scenarios[current].options[0];
-  } else {
-    winner = scenarios[current].options[1];
-  }
+    function startTimer() {
+      clearInterval(timerInterval);
 
-  document.getElementById("result").innerHTML =
-    "<h3>Winner: " + winner + "</h3>" +
-    "<p>" + votes[0] + " vs " + votes[1] + "</p>";
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        const timer = document.getElementById("timer");
+        if (timer) {
+          timer.textContent = `⏳ Time left: ${timeLeft} sec`;
+        }
 
-  if (current < scenarios.length - 1) {
-    setTimeout(() => {
-      current++;
-      loadScenario();
-    }, 3000);
-  } else {
-    document.getElementById("result").innerHTML +=
-      "<p><b>All scenarios finished 🎉</b></p>";
-  }
-}
+        if (timeLeft <= 0) {
+          endVoting();
+        }
+      }, 1000);
+    }
 
-loadScenario();
-</script>
+    function endVotingEarly() {
+      if (votingEnded) return;
+      endVoting();
+    }
 
+    function endVoting() {
+      clearInterval(timerInterval);
+      votingEnded = true;
+
+      const scenario = scenarios[currentScenario];
+      const btn1 = document.getElementById("btn1");
+      const btn2 = document.getElementById("btn2");
+      const skipBtn = document.getElementById("skipBtn");
+
+      if (btn1) btn1.disabled = true;
+      if (btn2) btn2.disabled = true;
+      if (skipBtn) skipBtn.disabled = true;
+
+      let winnerText = "";
+      let winnerVotes = 0;
+
+      if (votes[0] === votes[1]) {
+        winnerText = `Tie: ${scenario.options[0]} and ${scenario.options[1]}`;
+        winnerVotes = votes[0];
+      } else if (votes[0] > votes[1]) {
+        winnerText = scenario.options[0];
+        winnerVotes = votes[0];
+      } else {
+        winnerText = scenario.options[1];
+        winnerVotes = votes[1];
+      }
+
+      resultsSummary.push({
+        question: scenario.text,
+        winner: winnerText,
+        vote1: votes[0],
+        vote2: votes[1],
+        options: scenario.options,
+        highestVotes: winnerVotes
+      });
+
+      const resultArea = document.getElementById("resultArea");
+      resultArea.innerHTML = `
+        <div class="result-box">
+          <div class="winner-title">Winning Answer</div>
+          <div class="winner-answer">${winnerText}</div>
+          <div class="score">${scenario.options[0]}: ${votes[0]} votes</div>
+          <div class="score">${scenario.options[1]}: ${votes[1]} votes</div>
+          ${
+            currentScenario < scenarios.length - 1
+              ? `<button class="next-btn" id="nextBtn">Next Question</button>`
+              : `<button class="next-btn" id="finalBtn">Show Final Summary</button>`
+          }
+        </div>
+      `;
+
+      if (currentScenario < scenarios.length - 1) {
+        document.getElementById("nextBtn").addEventListener("click", nextScenario);
+      } else {
+        document.getElementById("finalBtn").addEventListener("click", renderSummary);
+      }
+    }
+
+    function nextScenario() {
+      currentScenario++;
+      renderScenario();
+    }
+
+    function renderSummary() {
+      let summaryHTML = `
+        <div class="badge">Completed</div>
+        <div class="summary-title">Final Results Summary</div>
+        <div class="summary-subtitle">Here are the answers that received the highest votes for all 5 questions</div>
+        <div class="summary-list">
+      `;
+
+      resultsSummary.forEach((item, index) => {
+        summaryHTML += `
+          <div class="summary-item">
+            <div class="summary-question">${index + 1}. ${item.question}</div>
+            <div class="summary-answer">Top Answer: ${item.winner}</div>
+            <div class="summary-votes">
+              ${item.options[0]}: ${item.vote1} votes<br>
+              ${item.options[1]}: ${item.vote2} votes
+            </div>
+          </div>
+        `;
+      });
+
+      summaryHTML += `
+        </div>
+        <button class="restart-btn" id="restartBtn">Restart All Questions</button>
+        <div class="footer-note">You can restart the full session anytime.</div>
+      `;
+
+      app.innerHTML = summaryHTML;
+
+      document.getElementById("restartBtn").addEventListener("click", restartAll);
+    }
+
+    function restartAll() {
+      currentScenario = 0;
+      resultsSummary.length = 0;
+      votes = [0, 0];
+      timeLeft = 30;
+      votingEnded = false;
+      clearInterval(timerInterval);
+      renderScenario();
+    }
+
+    renderScenario();
+  </script>
 </body>
 </html>
